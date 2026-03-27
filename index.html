@@ -14,34 +14,25 @@
             --border: #333333;
         }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 100px; transition: background 0.3s, color 0.3s; }
-        .container { max-width: 1000px; margin: 0 auto; }
-
-        /* Navigation & Search */
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 50px; transition: background 0.3s, color 0.3s; }
+        
+        /* Navigation & Core UI */
         .top-nav { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
         .nav-btn { padding: 10px 20px; border-radius: 25px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.2s; }
         .nav-btn:hover { border-color: var(--accent); }
+        .back-btn { background: var(--accent); color: white; border: none; }
         
         .search-container { display: flex; flex: 1; min-width: 250px; gap: 5px; }
         input[type="text"] { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
         .search-btn { padding: 10px 25px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
 
-        /* Theme Controls */
         .theme-controls { display: flex; align-items: center; gap: 10px; margin-left: auto; }
         .color-picker { -webkit-appearance: none; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; background: none; }
         .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
         .color-picker::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 50%; }
 
-        /* Category Chips */
-        .chip-container { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; }
-        .chip { padding: 8px 16px; border-radius: 15px; background: var(--card); color: var(--text); border: 1px solid var(--border); cursor: pointer; white-space: nowrap; font-size: 14px; transition: 0.2s; }
-        .chip:hover { background: var(--accent); color: white; border-color: var(--accent); }
-        
-        /* NEW: Special style for the Random button */
-        .chip-random { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
-
-        /* Video Grid */
-        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        /* Video Grid & Cards */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
         .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); display: flex; flex-direction: column; }
         .card:hover { transform: translateY(-5px); border-color: var(--accent); }
         
@@ -51,483 +42,204 @@
         .progress-bar { height: 100%; background: var(--accent); width: 0%; }
         
         .card-info { padding: 12px; font-size: 14px; font-weight: bold; flex-grow: 1; }
-        .queue-add-btn { margin: 0 12px 12px 12px; padding: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .queue-add-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .card-channel { font-size: 12px; color: #aaa; margin-top: 5px; font-weight: normal; }
+        
+        .card-actions { display: flex; gap: 5px; padding: 0 12px 12px 12px; }
+        .action-btn { flex: 1; padding: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; }
+        .action-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
-        /* NEW: Stats Dashboard Styles */
-        .stats-dashboard { background: var(--card); border: 1px solid var(--accent); border-radius: 15px; padding: 40px; text-align: center; max-width: 500px; margin: 40px auto; }
-        .stats-number { font-size: 3rem; font-weight: bold; color: var(--accent); margin: 10px 0; }
-        .stats-label { font-size: 1.2rem; color: #888; }
+        h2, h3 { border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; }
 
-        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .clear-btn { font-size: 12px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 5px 10px; border-radius: 15px; cursor: pointer; display: none; }
-        .clear-btn:hover { background: #ff4444; color: white; }
+        /* VIEW CONTAINERS */
+        #main-view, #watch-view, #channel-view { display: none; max-width: 1200px; margin: 0 auto; }
+        #main-view { display: block; } /* Default visible */
 
-        .load-more-container { text-align: center; margin-top: 40px; }
-        #load-more-btn { display: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; border: none; background: var(--card); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.2s; margin: 0 auto; border: 1px solid var(--border); }
-        #load-more-btn:hover { border-color: var(--accent); }
+        /* --- WATCH PAGE STYLES --- */
+        .watch-layout { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+        .watch-left { flex: 1; min-width: 60%; }
+        .watch-right { width: 350px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .video-player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 15px; }
+        #yt-api-player { width: 100%; height: 100%; border: none; }
+        
+        .watch-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        
+        .watch-details-box { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
+        .creator-bar { display: flex; align-items: center; gap: 15px; cursor: pointer; padding-bottom: 15px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .creator-bar:hover { opacity: 0.8; }
+        .creator-avatar { width: 50px; height: 50px; border-radius: 50%; background: #333; object-fit: cover; }
+        .creator-name { font-weight: bold; font-size: 16px; }
+        
+        .watch-description { margin-top: 15px; font-size: 14px; color: #ccc; white-space: pre-wrap; line-height: 1.5; max-height: 200px; overflow-y: auto; }
+        
+        .recommended-label { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+        .side-card { display: flex; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .side-card:hover { transform: scale(1.02); }
+        .side-thumb { width: 160px; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; flex-shrink: 0; }
+        .side-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .side-info { font-size: 13px; font-weight: bold; }
+        .side-channel { font-size: 11px; color: #aaa; margin-top: 4px; font-weight: normal; }
 
-        /* Mini Player & Draggable Feature */
-        #mini-player { display: none; position: fixed; bottom: 20px; right: 20px; width: 380px; background: var(--bg); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid var(--border); z-index: 1000; overflow: hidden; transition: width 0.3s, height 0.3s; }
+        /* --- CHANNEL PAGE STYLES --- */
+        .channel-header { display: flex; align-items: center; gap: 30px; background: var(--card); padding: 40px; border-radius: 15px; border: 1px solid var(--border); margin-top: 20px; margin-bottom: 30px; }
+        .channel-header-avatar { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); }
+        .channel-header-info h1 { margin: 0 0 10px 0; font-size: 28px; }
+        .channel-stats { color: #aaa; font-size: 14px; }
         
-        /* NEW: Drag cursor indicator */
-        .player-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--card); cursor: grab; user-select: none; }
-        .player-header:active { cursor: grabbing; }
-        
-        #mini-player.theater-mode { width: 80vw; max-width: 1000px; bottom: 50% !important; right: 50% !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); box-shadow: 0 0 0 100vmax rgba(0,0,0,0.9); }
-        
-        .player-title { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; pointer-events: none; }
-        
-        .player-controls { display: flex; gap: 10px; }
-        .ctrl-btn { background: none; border: none; color: var(--text); font-size: 14px; cursor: pointer; padding: 0 5px; font-weight: bold; transition: 0.2s; }
-        .ctrl-btn:hover { color: var(--accent); }
-        
-        .video-frame { position: relative; padding-bottom: 56.25%; height: 0; background: #000; pointer-events: auto; }
-        #yt-api-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="top-nav">
-        <button class="nav-btn" onclick="loadMyFeed()">🏠 My FYP</button>
-        <button class="nav-btn" onclick="showHistory()">🕒 History</button>
-        <button class="nav-btn" onclick="showQueue()">📋 Queue</button>
-        <button class="nav-btn" onclick="showStats()">📊 Stats</button>
-        
-        <div class="search-container">
-            <input type="text" id="query" placeholder="Search for a video...">
-            <button class="search-btn" onclick="searchVideos()">Search</button>
-        </div>
-        
-        <div class="theme-controls">
-            <input type="color" id="accent-picker" class="color-picker" value="#ff0000" onchange="changeAccentColor()">
-            <button class="nav-btn" onclick="toggleTheme()">🌓 Theme</button>
-        </div>
-    </div>
-
-    <div class="chip-container">
-        <button class="chip chip-random" onclick="playRandomVideo()">🎲 Surprise Me</button>
-        
-        <button class="chip" onclick="searchCategory('Gaming')">🎮 Gaming</button>
-        <button class="chip" onclick="searchCategory('Music')">🎵 Music</button>
-        <button class="chip" onclick="searchCategory('Coding')">💻 Coding</button>
-        <button class="chip" onclick="searchCategory('Comedy')">🤣 Comedy</button>
-        <button class="chip" onclick="searchCategory('Podcasts')">🎙️ Podcasts</button>
-        <button class="chip" onclick="searchCategory('Science')">🔬 Science</button>
-    </div>
-
-    <h2>
-        <span id="results-label">Loading your feed...</span>
-        <button id="clear-history-btn" class="clear-btn" onclick="clearHistory()">Clear History</button>
-    </h2>
+<div class="top-nav">
+    <button class="nav-btn back-btn" id="global-back-btn" onclick="goHome()" style="display: none;">⬅ Back to Home</button>
+    <button class="nav-btn" onclick="loadMyFeed()">🏠 My FYP</button>
+    <button class="nav-btn" onclick="showHistory()">🕒 History</button>
+    <button class="nav-btn" onclick="showQueue()">📋 Queue</button>
     
-    <div id="results-grid" class="video-grid"></div>
+    <div class="search-container">
+        <input type="text" id="query" placeholder="Search for a video...">
+        <button class="search-btn" onclick="searchVideos()">Search</button>
+    </div>
     
-    <div class="load-more-container">
-        <button id="load-more-btn" onclick="loadMore()">↓ Load More Videos ↓</button>
+    <div class="theme-controls">
+        <input type="color" id="accent-picker" class="color-picker" value="#ff0000" onchange="changeAccentColor()">
     </div>
 </div>
 
-<div id="mini-player">
-    <div class="player-header" id="drag-header">
-        <div id="mini-title" class="player-title">Playing...</div>
-        <div class="player-controls">
-            <button class="ctrl-btn" onclick="togglePlayPause()" id="play-pause-btn">⏸</button>
-            <button class="ctrl-btn" onclick="playNextInQueue()">⏭</button>
-            <button class="ctrl-btn" onclick="toggleTheaterMode()">⛶</button>
-            <button class="ctrl-btn" onclick="closePlayer()">✕</button>
+<div id="main-view">
+    <h2 id="results-label">Loading your feed...</h2>
+    <div id="results-grid" class="video-grid"></div>
+</div>
+
+<div id="watch-view">
+    <div class="watch-layout">
+        <div class="watch-left">
+            <div class="video-player-container">
+                <div id="yt-api-player"></div>
+            </div>
+            <div class="watch-title" id="watch-title-display">Video Title</div>
+            
+            <div class="watch-details-box">
+                <div class="creator-bar" id="watch-creator-btn">
+                    <img src="" id="watch-creator-avatar" class="creator-avatar" alt="Profile">
+                    <div class="creator-name" id="watch-creator-name">Creator Name</div>
+                </div>
+                <div class="watch-description" id="watch-description-display">Loading description...</div>
+            </div>
+        </div>
+        
+        <div class="watch-right">
+            <div class="recommended-label">Recommended for you</div>
+            <div id="recommended-grid"></div>
         </div>
     </div>
-    <div class="video-frame">
-        <div id="yt-api-player"></div>
+</div>
+
+<div id="channel-view">
+    <div class="channel-header">
+        <img src="" id="channel-page-avatar" class="channel-header-avatar" alt="Channel Avatar">
+        <div class="channel-header-info">
+            <h1 id="channel-page-name">Creator Name</h1>
+            <div class="channel-stats" id="channel-page-stats">Loading stats...</div>
+        </div>
     </div>
+    <h3>Latest Videos</h3>
+    <div id="channel-video-grid" class="video-grid"></div>
 </div>
 
 <script>
     var API_KEY = 'AIzaSyApWV2GTxLf9aVm5I-AKPeSCZQLvEyvUz0'; // <--- PUT YOUR KEY HERE
-    
     var ytPlayer; 
     var myQueue = [];
-    var currentApiUrl = ''; 
-    var nextPageToken = '';
-    var timeTracker;
     var currentPlayingId = '';
-    var isLightMode = false;
-
-    // --- NEW: Draggable Player Variables ---
-    var isDragging = false;
-    var dragOffsetX = 0;
-    var dragOffsetY = 0;
+    var timeTracker;
 
     window.onload = function() {
         if (API_KEY !== 'YOUR_API_KEY_HERE') {
             loadMyFeed();
-            var savedAccent = localStorage.getItem('yt_accent_color');
-            if(savedAccent) {
-                document.getElementById('accent-picker').value = savedAccent;
-                changeAccentColor();
-            }
         } else {
             document.getElementById('results-label').innerText = "Please add your API key to the code!";
         }
-        setupDraggablePlayer();
     };
 
-    // --- NEW: Draggable (PiP) Logic ---
-    function setupDraggablePlayer() {
-        var header = document.getElementById('drag-header');
-        var playerBox = document.getElementById('mini-player');
-
-        header.onmousedown = function(e) {
-            // Prevent dragging if clicking a button or in theater mode
-            if(e.target.tagName === 'BUTTON' || playerBox.classList.contains('theater-mode')) return;
-            isDragging = true;
-            var rect = playerBox.getBoundingClientRect();
-            dragOffsetX = e.clientX - rect.left;
-            dragOffsetY = e.clientY - rect.top;
-        };
-
-        document.onmousemove = function(e) {
-            if (isDragging) {
-                // Remove the fixed bottom/right snapping so free movement works
-                playerBox.style.bottom = 'auto';
-                playerBox.style.right = 'auto';
-                playerBox.style.left = (e.clientX - dragOffsetX) + 'px';
-                playerBox.style.top = (e.clientY - dragOffsetY) + 'px';
-            }
-        };
-
-        document.onmouseup = function() {
-            isDragging = false;
-        };
-    }
-
-    // --- NEW: Watch Time Stats ---
-    function showStats() {
-        document.getElementById('results-label').innerText = 'Your Analytics';
-        document.getElementById('clear-history-btn').style.display = 'none'; 
-        document.getElementById('load-more-btn').style.display = 'none'; 
+    // --- VIEW CONTROLLER ---
+    function showView(viewId) {
+        document.getElementById('main-view').style.display = 'none';
+        document.getElementById('watch-view').style.display = 'none';
+        document.getElementById('channel-view').style.display = 'none';
         
-        var totalSeconds = parseInt(localStorage.getItem('yt_total_watch_time')) || 0;
-        var hours = Math.floor(totalSeconds / 3600);
-        var minutes = Math.floor((totalSeconds % 3600) / 60);
-
-        var grid = document.getElementById('results-grid');
-        grid.style.display = 'block'; // Remove grid style temporarily for a clean card
+        document.getElementById(viewId).style.display = 'block';
         
-        grid.innerHTML = '<div class="stats-dashboard">' +
-            '<div class="stats-label">Total Time Watched on Hub</div>' +
-            '<div class="stats-number">' + hours + '<span style="font-size: 1.5rem;">hrs</span> ' + minutes + '<span style="font-size: 1.5rem;">mins</span></div>' +
-            '<p style="color: #888; font-size: 0.9rem;">This tracks every second a video is actively playing.</p>' +
-            '</div>';
-    }
-
-    // --- NEW: Random Video Generator ---
-    function playRandomVideo() {
-        document.getElementById('results-label').innerText = 'Rolling the dice...';
-        // A list of fun, totally random topics to pull from
-        var randomTopics = ['deep ocean documentary', 'optical illusions', 'history mysteries', 'satisfying restoration', 'space exploration', 'funny animal fails', 'street food tour'];
-        var selectedTopic = randomTopics[Math.floor(Math.random() * randomTopics.length)];
-        
-        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(selectedTopic);
-        
-        fetch(url)
-            .then(function(res) { return res.json(); })
-            .then(function(data) { 
-                if(data.items && data.items.length > 0) {
-                    var item = data.items[0];
-                    // Instantly play the first result it finds!
-                    playVideo(item.id.videoId, item.snippet.title, item.snippet.thumbnails.medium.url);
-                }
-            });
-    }
-
-    // --- Theme & Navigation Functions ---
-    function toggleTheme() {
-        var root = document.documentElement;
-        isLightMode = !isLightMode;
-        if (isLightMode) {
-            root.style.setProperty('--bg', '#f0f0f0'); root.style.setProperty('--card', '#ffffff');
-            root.style.setProperty('--text', '#111111'); root.style.setProperty('--border', '#dddddd');
+        if (viewId === 'main-view') {
+            document.getElementById('global-back-btn').style.display = 'none';
+            if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
         } else {
-            root.style.setProperty('--bg', '#0f0f0f'); root.style.setProperty('--card', '#1e1e1e');
-            root.style.setProperty('--text', '#efefef'); root.style.setProperty('--border', '#333333');
+            document.getElementById('global-back-btn').style.display = 'block';
         }
     }
 
-    function changeAccentColor() {
-        var color = document.getElementById('accent-picker').value;
-        document.documentElement.style.setProperty('--accent', color);
-        localStorage.setItem('yt_accent_color', color);
+    function goHome() {
+        showView('main-view');
+        loadMyFeed(); // Refresh the feed to show updated progress bars
     }
 
-    function searchCategory(category) {
-        document.getElementById('results-grid').style.display = 'grid'; // Reset grid display
-        document.getElementById('clear-history-btn').style.display = 'none';
-        document.getElementById('results-label').innerText = category + ' Videos';
-        currentApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(category + ' trending');
-        fetchVideos(currentApiUrl, false);
-    }
-
-    function togglePlayPause() {
-        if (!ytPlayer) return;
-        var state = ytPlayer.getPlayerState();
-        var btn = document.getElementById('play-pause-btn');
-        if (state === YT.PlayerState.PLAYING) {
-            ytPlayer.pauseVideo(); btn.innerText = '▶';
-        } else {
-            ytPlayer.playVideo(); btn.innerText = '⏸';
-        }
-    }
-
-    function toggleTheaterMode() {
-        var playerBox = document.getElementById('mini-player');
-        if (playerBox.classList.contains('theater-mode')) {
-            playerBox.classList.remove('theater-mode');
-            // Reset to original corner position
-            playerBox.style.left = 'auto';
-            playerBox.style.top = 'auto';
-            playerBox.style.bottom = '20px';
-            playerBox.style.right = '20px';
-        } else {
-            playerBox.classList.add('theater-mode');
-            // Clean up inline drag styles so CSS translate works
-            playerBox.style.left = ''; playerBox.style.top = '';
-        }
-    }
-
-    function getProgressHTML(id) {
-        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-        for (var i = 0; i < history.length; i++) {
-            if (history[i].id === id && history[i].totalTime > 0) {
-                var percentage = (history[i].savedTime / history[i].totalTime) * 100;
-                if (percentage > 100) percentage = 100;
-                if (percentage > 1) {
-                    return '<div class="progress-bg"><div class="progress-bar" style="width:' + percentage + '%;"></div></div>';
-                }
-            }
-        }
-        return ''; 
-    }
-
-    function loadMyFeed() {
-        document.getElementById('results-grid').style.display = 'grid';
-        document.getElementById('clear-history-btn').style.display = 'none';
-        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-
-        if (history.length === 0) {
-            document.getElementById('results-label').innerText = 'Trending (Watch videos to build your FYP!)';
-            currentApiUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=US&maxResults=50&key=' + API_KEY;
-        } else {
-            var randomPastVideo = history[Math.floor(Math.random() * history.length)];
-            var searchTitle = typeof randomPastVideo === 'string' ? randomPastVideo : randomPastVideo.title;
-            var shortTitle = searchTitle.length > 30 ? searchTitle.substring(0, 30) + '...' : searchTitle;
-            
-            document.getElementById('results-label').innerText = 'Because you watched: "' + shortTitle + '"';
-            currentApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(searchTitle);
-        }
-        fetchVideos(currentApiUrl, false);
-    }
-
-    function searchVideos() {
-        document.getElementById('results-grid').style.display = 'grid';
-        document.getElementById('clear-history-btn').style.display = 'none';
-        var q = document.getElementById('query').value;
-        if (!q) return;
+    // --- CARD BUILDER ---
+    function createCard(id, title, thumb, channelTitle, channelId) {
+        var card = document.createElement('div');
+        card.className = 'card';
+        var progressHTML = getProgressHTML(id);
         
-        document.getElementById('results-label').innerText = 'Search Results for: "' + q + '"';
-        currentApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(q);
-        fetchVideos(currentApiUrl, false);
-    }
-
-    function fetchVideos(url, isAppending) {
-        var finalUrl = url;
-        if (isAppending && nextPageToken) finalUrl += '&pageToken=' + nextPageToken;
-
-        fetch(finalUrl)
-            .then(function(res) { return res.json(); })
-            .then(function(data) { 
-                nextPageToken = data.nextPageToken || ''; 
-                if(data.items) { render(data.items, isAppending); }
-                if (nextPageToken !== '') { document.getElementById('load-more-btn').style.display = 'block'; } 
-                else { document.getElementById('load-more-btn').style.display = 'none'; }
-            });
-    }
-
-    function loadMore() {
-        if (currentApiUrl !== '') fetchVideos(currentApiUrl, true);
-    }
-
-    function showHistory() {
-        document.getElementById('results-grid').style.display = 'grid';
-        document.getElementById('results-label').innerText = 'Your Watch History';
-        document.getElementById('clear-history-btn').style.display = 'block'; 
-        document.getElementById('load-more-btn').style.display = 'none'; 
+        var safeChannel = channelTitle ? channelTitle : 'Unknown Creator';
         
-        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-        var grid = document.getElementById('results-grid');
-        grid.innerHTML = ''; 
-
-        if (history.length === 0) {
-            grid.innerHTML = '<p>Your history is empty. Go watch some videos!</p>'; return;
-        }
-
-        for (var i = 0; i < history.length; i++) {
-            var item = history[i];
-            var id = typeof item === 'string' ? '' : item.id;
-            var title = typeof item === 'string' ? item : item.title;
-            var thumb = typeof item === 'string' ? 'https://via.placeholder.com/320x180/222222/ffffff?text=Old+Video' : item.thumb;
-
-            var card = document.createElement('div');
-            card.className = 'card';
-            var progressHTML = getProgressHTML(id);
-            card.innerHTML = '<div class="thumb-container"><img src="' + thumb + '">' + progressHTML + '</div><div class="card-info">' + title + '</div>';
-            
-            if (id !== '') {
-                card.onclick = (function(v_id, v_title, v_thumb) {
-                    return function() { playVideo(v_id, v_title, v_thumb); };
-                })(id, title, thumb);
-            }
-            grid.appendChild(card);
-        }
-    }
-
-    function showQueue() {
-        document.getElementById('results-grid').style.display = 'grid';
-        document.getElementById('results-label').innerText = 'Up Next (Your Queue)';
-        document.getElementById('clear-history-btn').style.display = 'none'; 
-        document.getElementById('load-more-btn').style.display = 'none'; 
+        card.innerHTML = 
+            '<div class="thumb-container"><img src="' + thumb + '">' + progressHTML + '</div>' +
+            '<div class="card-info">' + title + '<div class="card-channel">' + safeChannel + '</div></div>';
         
-        var grid = document.getElementById('results-grid');
-        grid.innerHTML = ''; 
+        var actions = document.createElement('div');
+        actions.className = 'card-actions';
 
-        if (myQueue.length === 0) {
-            grid.innerHTML = '<p>Your queue is empty. Click "+ Add to Queue" on a video to line it up!</p>'; return;
-        }
+        var queueBtn = document.createElement('button');
+        queueBtn.className = 'action-btn';
+        queueBtn.innerText = '+ Queue';
+        queueBtn.onclick = function(e) { e.stopPropagation(); addToQueue(id, title, thumb, safeChannel, channelId); };
 
-        for (var i = 0; i < myQueue.length; i++) {
-            var item = myQueue[i];
-            var card = document.createElement('div');
-            card.className = 'card';
-            var progressHTML = getProgressHTML(item.id);
-            card.innerHTML = '<div class="thumb-container"><img src="' + item.thumb + '">' + progressHTML + '</div><div class="card-info">' + item.title + '</div>';
-            
-            card.onclick = (function(v_id, v_title, v_thumb) {
-                return function() { playVideo(v_id, v_title, v_thumb); };
-            })(item.id, item.title, item.thumb);
-            grid.appendChild(card);
-        }
+        actions.appendChild(queueBtn);
+        card.appendChild(actions);
+
+        card.onclick = function() { playVideo(id, title, thumb, safeChannel, channelId); };
+        return card;
     }
 
-    function clearHistory() {
-        if (confirm("Are you sure you want to delete your history? This will reset your FYP!")) {
-            localStorage.removeItem('yt_my_history');
-            showHistory(); 
-        }
-    }
-
-    function addToQueue(id, title, thumb) {
-        myQueue.push({ id: id, title: title, thumb: thumb });
-        alert('Added to Queue: ' + title);
-    }
-
-    function playNextInQueue() {
-        if (myQueue.length > 0) {
-            var nextVideo = myQueue.shift(); 
-            playVideo(nextVideo.id, nextVideo.title, nextVideo.thumb);
-        } else {
-            closePlayer(); 
-        }
-    }
-
-    function render(items, isAppending) {
-        var grid = document.getElementById('results-grid');
-        if (!isAppending) { grid.innerHTML = ''; }
-        
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var id = item.id.videoId || item.id; 
-            var title = item.snippet.title;
-            var thumb = item.snippet.thumbnails.medium.url;
-            
-            var card = document.createElement('div');
-            card.className = 'card';
-            var progressHTML = getProgressHTML(id);
-            
-            card.innerHTML = '<div class="thumb-container"><img src="' + thumb + '">' + progressHTML + '</div><div class="card-info">' + title + '</div>';
-            
-            var queueBtn = document.createElement('button');
-            queueBtn.className = 'queue-add-btn';
-            queueBtn.innerText = '+ Add to Queue';
-            queueBtn.onclick = (function(v_id, v_title, v_thumb) {
-                return function(e) { e.stopPropagation(); addToQueue(v_id, v_title, v_thumb); };
-            })(id, title, thumb);
-            
-            card.appendChild(queueBtn);
-            card.onclick = (function(v_id, v_title, v_thumb) {
-                return function() { playVideo(v_id, v_title, v_thumb); };
-            })(id, title, thumb);
-            
-            grid.appendChild(card);
-        }
-    }
-
-    function saveCurrentTime() {
-        if (ytPlayer && currentPlayingId) {
-            var currentTime = ytPlayer.getCurrentTime();
-            var totalDuration = ytPlayer.getDuration();
-            var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-            for (var i = 0; i < history.length; i++) {
-                if (history[i].id === currentPlayingId) {
-                    history[i].savedTime = currentTime;
-                    history[i].totalTime = totalDuration; 
-                    break;
-                }
-            }
-            localStorage.setItem('yt_my_history', JSON.stringify(history));
-            
-            // NEW: Add 2 seconds to global watch time!
-            var globalTime = parseInt(localStorage.getItem('yt_total_watch_time')) || 0;
-            localStorage.setItem('yt_total_watch_time', globalTime + 2);
-        }
-    }
-
-    function resetCurrentTime() {
-        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-        for (var i = 0; i < history.length; i++) {
-            if (history[i].id === currentPlayingId) { history[i].savedTime = 0; break; }
-        }
-        localStorage.setItem('yt_my_history', JSON.stringify(history));
-    }
-
-    function playVideo(id, title, thumb) {
+    // --- WATCH PAGE LOGIC ---
+    function playVideo(id, title, thumb, channelTitle, channelId) {
         currentPlayingId = id; 
+        showView('watch-view');
+        
+        // Update basic UI instantly
+        document.getElementById('watch-title-display').innerText = title;
+        document.getElementById('watch-creator-name').innerText = channelTitle || 'Loading...';
+        document.getElementById('watch-description-display').innerText = 'Loading description...';
+        document.getElementById('watch-creator-avatar').src = 'https://via.placeholder.com/50/333333/ffffff?text=?';
+
+        // Setup Creator Click
+        document.getElementById('watch-creator-btn').onclick = function() {
+            if (channelId) openChannelPage(channelId, channelTitle);
+        };
+
+        // Initialize Player
         var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
         var startTime = 0;
-        var existingIndex = -1;
-
         for (var i = 0; i < history.length; i++) {
-            if (history[i].id === id) {
-                existingIndex = i;
-                startTime = Math.floor(history[i].savedTime || 0);
-                break;
-            }
+            if (history[i].id === id) { startTime = Math.floor(history[i].savedTime || 0); break; }
         }
 
-        var currentVideoObj = { id: id, title: title, thumb: thumb, savedTime: startTime, totalTime: 0 };
-        if (existingIndex > -1) {
-            currentVideoObj.totalTime = history[existingIndex].totalTime || 0;
-            history.splice(existingIndex, 1); 
-        }
-        history.unshift(currentVideoObj); 
+        // Save to history
+        var currentVideoObj = { id: id, title: title, thumb: thumb, channelTitle: channelTitle, channelId: channelId, savedTime: startTime, totalTime: 0 };
+        history = history.filter(function(v) { return v.id !== id; });
+        history.unshift(currentVideoObj);
         if (history.length > 40) history.pop();
         localStorage.setItem('yt_my_history', JSON.stringify(history));
 
-        document.getElementById('mini-player').style.display = 'block';
-        document.getElementById('mini-title').innerText = title;
-        document.getElementById('play-pause-btn').innerText = '⏸'; 
-        
         if (!ytPlayer) {
             ytPlayer = new YT.Player('yt-api-player', {
                 videoId: id,
@@ -537,15 +249,8 @@
                         if (event.data === YT.PlayerState.PLAYING) {
                             clearInterval(timeTracker);
                             timeTracker = setInterval(saveCurrentTime, 2000); 
-                            document.getElementById('play-pause-btn').innerText = '⏸';
                         } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-                            clearInterval(timeTracker);
-                            saveCurrentTime(); 
-                            document.getElementById('play-pause-btn').innerText = '▶';
-                            
-                            if (event.data === YT.PlayerState.ENDED) {
-                                resetCurrentTime(); playNextInQueue();
-                            }
+                            clearInterval(timeTracker); saveCurrentTime(); 
                         }
                     }
                 }
@@ -553,24 +258,209 @@
         } else {
             ytPlayer.loadVideoById({ videoId: id, startSeconds: startTime });
         }
+
+        fetchVideoDetails(id);
+        if (channelId) fetchChannelAvatar(channelId);
+        fetchRecommended(title);
     }
 
-    function closePlayer() {
-        var playerBox = document.getElementById('mini-player');
-        playerBox.style.display = 'none';
-        playerBox.classList.remove('theater-mode'); 
+    function fetchVideoDetails(videoId) {
+        var url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' + videoId + '&key=' + API_KEY;
+        fetch(url).then(function(res) { return res.json(); }).then(function(data) {
+            if (data.items && data.items.length > 0) {
+                var desc = data.items[0].snippet.description;
+                document.getElementById('watch-description-display').innerText = desc ? desc : "No description provided.";
+            }
+        });
+    }
+
+    function fetchChannelAvatar(channelId) {
+        var url = 'https://www.googleapis.com/youtube/v3/channels?part=snippet&id=' + channelId + '&key=' + API_KEY;
+        fetch(url).then(function(res) { return res.json(); }).then(function(data) {
+            if (data.items && data.items.length > 0) {
+                document.getElementById('watch-creator-avatar').src = data.items[0].snippet.thumbnails.default.url;
+            }
+        });
+    }
+
+    function fetchRecommended(videoTitle) {
+        // Search API using the first few words of the video title to simulate related videos
+        var shortTitle = videoTitle.split(' ').slice(0, 3).join(' ');
+        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&type=video&q=' + encodeURIComponent(shortTitle) + '&key=' + API_KEY;
         
-        // Reset position so it goes back to the corner next time
-        playerBox.style.left = 'auto'; playerBox.style.top = 'auto';
-        playerBox.style.bottom = '20px'; playerBox.style.right = '20px';
+        fetch(url).then(function(res) { return res.json(); }).then(function(data) {
+            var grid = document.getElementById('recommended-grid');
+            grid.innerHTML = '';
+            if (data.items) {
+                for (var i = 0; i < data.items.length; i++) {
+                    var item = data.items[i];
+                    var rId = item.id.videoId;
+                    var rTitle = item.snippet.title;
+                    var rThumb = item.snippet.thumbnails.medium.url;
+                    var rChan = item.snippet.channelTitle;
+                    var rChanId = item.snippet.channelId;
+                    
+                    if (rId === currentPlayingId) continue; // Skip currently playing
+
+                    var sideCard = document.createElement('div');
+                    sideCard.className = 'side-card';
+                    sideCard.innerHTML = 
+                        '<div class="side-thumb"><img src="' + rThumb + '"></div>' +
+                        '<div class="side-text"><div class="side-info">' + rTitle + '</div><div class="side-channel">' + rChan + '</div></div>';
+                    
+                    sideCard.onclick = (function(id, t, th, c, cid) {
+                        return function() { window.scrollTo(0,0); playVideo(id, t, th, c, cid); };
+                    })(rId, rTitle, rThumb, rChan, rChanId);
+
+                    grid.appendChild(sideCard);
+                }
+            }
+        });
+    }
+
+    // --- CREATOR PAGE LOGIC ---
+    function openChannelPage(channelId, channelTitle) {
+        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+        showView('channel-view');
         
-        if (ytPlayer) {
-            saveCurrentTime(); clearInterval(timeTracker); ytPlayer.stopVideo(); 
+        document.getElementById('channel-page-name').innerText = channelTitle;
+        document.getElementById('channel-page-avatar').src = 'https://via.placeholder.com/120/333333/ffffff?text=?';
+        document.getElementById('channel-page-stats').innerText = "Loading stats...";
+        document.getElementById('channel-video-grid').innerHTML = 'Loading videos...';
+
+        // Get Channel Stats/Avatar
+        var chanUrl = 'https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=' + channelId + '&key=' + API_KEY;
+        fetch(chanUrl).then(function(res) { return res.json(); }).then(function(data) {
+            if (data.items && data.items.length > 0) {
+                var info = data.items[0];
+                document.getElementById('channel-page-avatar').src = info.snippet.thumbnails.high.url;
+                
+                var subs = info.statistics.subscriberCount;
+                var viewCount = info.statistics.viewCount;
+                var subText = subs ? Number(subs).toLocaleString() + ' Subscribers' : 'Subscribers hidden';
+                document.getElementById('channel-page-stats').innerText = subText + ' • ' + Number(viewCount).toLocaleString() + ' Total Views';
+            }
+        });
+
+        // Get Channel Latest Videos
+        var vidsUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=' + channelId + '&maxResults=20&order=date&type=video&key=' + API_KEY;
+        fetch(vidsUrl).then(function(res) { return res.json(); }).then(function(data) {
+            var grid = document.getElementById('channel-video-grid');
+            grid.innerHTML = '';
+            if (data.items) {
+                for (var i = 0; i < data.items.length; i++) {
+                    var item = data.items[i];
+                    grid.appendChild(createCard(item.id.videoId, item.snippet.title, item.snippet.thumbnails.medium.url, item.snippet.channelTitle, channelId));
+                }
+            }
+        });
+    }
+
+    // --- MAIN FEED FUNCTIONS ---
+    function loadMyFeed() {
+        showView('main-view');
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        var url;
+
+        if (history.length === 0) {
+            document.getElementById('results-label').innerText = 'Trending Now';
+            url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=US&maxResults=50&key=' + API_KEY;
+        } else {
+            var randomPastVideo = history[Math.floor(Math.random() * history.length)];
+            var searchTitle = randomPastVideo.title;
+            document.getElementById('results-label').innerText = 'Because you watched: ' + searchTitle.substring(0, 30);
+            url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&key=' + API_KEY + '&q=' + encodeURIComponent(searchTitle);
         }
         
-        var currentLabel = document.getElementById('results-label').innerText;
-        if (currentLabel === 'Your Watch History') { showHistory(); } 
-        else if (currentLabel === 'Up Next (Your Queue)') { showQueue(); }
+        fetch(url).then(function(res) { return res.json(); }).then(function(data) { 
+            renderGrid(data.items); 
+        });
+    }
+
+    function searchVideos() {
+        showView('main-view');
+        var q = document.getElementById('query').value;
+        if (!q) return;
+        
+        document.getElementById('results-label').innerText = 'Search Results for: ' + q;
+        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&key=' + API_KEY + '&q=' + encodeURIComponent(q);
+        
+        fetch(url).then(function(res) { return res.json(); }).then(function(data) { renderGrid(data.items); });
+    }
+
+    function renderGrid(items) {
+        var grid = document.getElementById('results-grid');
+        grid.innerHTML = '';
+        if(!items) return;
+        
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            var id = item.id.videoId || item.id; 
+            var title = item.snippet.title;
+            var thumb = item.snippet.thumbnails.medium.url;
+            var cTitle = item.snippet.channelTitle;
+            var cId = item.snippet.channelId;
+            grid.appendChild(createCard(id, title, thumb, cTitle, cId));
+        }
+    }
+
+    // --- UTILITIES ---
+    function saveCurrentTime() {
+        if (ytPlayer && currentPlayingId) {
+            var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+            for (var i = 0; i < history.length; i++) {
+                if (history[i].id === currentPlayingId) {
+                    history[i].savedTime = ytPlayer.getCurrentTime();
+                    history[i].totalTime = ytPlayer.getDuration(); 
+                    break;
+                }
+            }
+            localStorage.setItem('yt_my_history', JSON.stringify(history));
+        }
+    }
+
+    function getProgressHTML(id) {
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        for (var i = 0; i < history.length; i++) {
+            if (history[i].id === id && history[i].totalTime > 0) {
+                var percentage = (history[i].savedTime / history[i].totalTime) * 100;
+                if (percentage > 1) return '<div class="progress-bg"><div class="progress-bar" style="width:' + percentage + '%;"></div></div>';
+            }
+        }
+        return ''; 
+    }
+
+    function addToQueue(id, title, thumb, channelTitle, channelId) {
+        myQueue.push({ id: id, title: title, thumb: thumb, channelTitle: channelTitle, channelId: channelId });
+        alert('Added to Queue!');
+    }
+
+    function showHistory() {
+        showView('main-view');
+        document.getElementById('results-label').innerText = 'Your Watch History';
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        var grid = document.getElementById('results-grid');
+        grid.innerHTML = ''; 
+
+        for (var i = 0; i < history.length; i++) {
+            var item = history[i];
+            grid.appendChild(createCard(item.id, item.title, item.thumb, item.channelTitle, item.channelId));
+        }
+    }
+
+    function showQueue() {
+        showView('main-view');
+        document.getElementById('results-label').innerText = 'Up Next (Your Queue)';
+        var grid = document.getElementById('results-grid');
+        grid.innerHTML = ''; 
+        for (var i = 0; i < myQueue.length; i++) {
+            var item = myQueue[i];
+            grid.appendChild(createCard(item.id, item.title, item.thumb, item.channelTitle, item.channelId));
+        }
+    }
+
+    function changeAccentColor() {
+        document.documentElement.style.setProperty('--accent', document.getElementById('accent-picker').value);
     }
 </script>
 <script>
@@ -751,7 +641,7 @@
 
 })();
 </script>
+
 </body>
 </html>
-
 
