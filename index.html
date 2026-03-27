@@ -3,31 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Video Player</title>
+    <title>My Personal Video Hub</title>
     <style>
-        body { font-family: sans-serif; background: #0f0f0f; color: #fff; padding: 20px; max-width: 900px; margin: 0 auto;}
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 10px; border-radius: 5px; border: none; background: #222; color: #fff; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; background: #ff0000; color: white; cursor: pointer; font-weight: bold;}
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .card { background: #1e1e1e; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .card:hover { background: #333; }
-        .card img { width: 100%; border-radius: 5px;}
+        :root { --bg: #0f0f0f; --card: #1e1e1e; --text: #efefef; --accent: #ff0000; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
         
-        #player-wrapper { display: none; margin-bottom: 30px; }
-        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        /* Search Bar */
+        .search-box { display: flex; gap: 10px; margin-bottom: 25px; }
+        input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #333; background: #000; color: white; outline: none; }
+        button { padding: 10px 25px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+
+        /* Video Player Area */
+        #player-wrapper { display: none; margin-bottom: 30px; background: #000; padding: 10px; border-radius: 12px; border: 1px solid #333; }
+        .video-frame { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; }
+        .video-frame iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        
+        /* Video Grid */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #222; }
+        .card:hover { transform: translateY(-5px); border-color: #444; background: #2a2a2a; }
+        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .card-info { padding: 12px; font-size: 14px; font-weight: bold; }
+
+        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <div class="search-box">
         <input type="text" id="query" placeholder="Search for a video...">
         <button onclick="searchVideos()">Search</button>
     </div>
 
     <div id="player-wrapper">
-        <div class="video-container">
+        <div class="video-frame">
             <iframe id="main-player" 
                     src="" 
                     allow="autoplay; fullscreen" 
@@ -35,233 +47,124 @@
                     allowfullscreen>
             </iframe>
         </div>
-        <h2 id="playing-title" style="margin-top: 15px;"></h2>
+        <h3 id="playing-title" style="margin-top: 15px;"></h3>
     </div>
 
-    <div id="results" class="grid"></div>
+    <h2 id="results-label">Loading your feed...</h2>
+    <div id="results-grid" class="video-grid"></div>
+</div>
 
 <script>
-    var API_KEY = 'AIzaSyApWV2GTxLf9aVm5I-AKPeSCZQLvEyvUz0'; // <--- PASTE YOUR KEY HERE
+    var API_KEY = 'YOUR_API_KEY_HERE'; // <--- PUT YOUR KEY HERE
+
+    window.onload = function() {
+        if (API_KEY !== 'YOUR_API_KEY_HERE') {
+            loadMyFeed();
+        } else {
+            document.getElementById('results-label').innerText = "Please add your API key to the code!";
+        }
+    };
+
+    function loadMyFeed() {
+        // 1. Grab the history from localStorage (or create an empty array if none exists)
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        var url = '';
+
+        if (history.length === 0) {
+            // 2. If you haven't watched anything yet, load Trending videos
+            document.getElementById('results-label').innerText = 'Trending (Watch videos to build your FYP!)';
+            url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=US&maxResults=15&key=' + API_KEY;
+        } else {
+            // 3. Pick a random video title from your watch history to base the feed on
+            var randomPastVideo = history[Math.floor(Math.random() * history.length)];
+            
+            // Clean up the text for the label so it doesn't get too long
+            var shortTitle = randomPastVideo.length > 30 ? randomPastVideo.substring(0, 30) + '...' : randomPastVideo;
+            document.getElementById('results-label').innerText = 'Because you watched: "' + shortTitle + '"';
+            
+            // Search YouTube for videos related to that past video
+            url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(randomPastVideo);
+        }
+        
+        fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(data) { 
+                if(data.items) { render(data.items); }
+            })
+            .catch(function(err) { console.log("Error fetching feed"); });
+    }
 
     function searchVideos() {
         var q = document.getElementById('query').value;
         if (!q) return;
         
-        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&type=video&key=' + API_KEY + '&q=' + encodeURIComponent(q);
+        document.getElementById('results-label').innerText = 'Search Results for: "' + q + '"';
+        
+        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(q);
         
         fetch(url)
             .then(function(res) { return res.json(); })
-            .then(function(data) { render(data.items); })
-            .catch(function(err) { console.log("Error fetching data"); });
+            .then(function(data) { 
+                if(data.items) { render(data.items); } 
+            })
+            .catch(function(err) { console.log("Error fetching search"); });
     }
 
     function render(items) {
-        var grid = document.getElementById('results');
-        grid.innerHTML = '';
+        var grid = document.getElementById('results-grid');
+        grid.innerHTML = ''; 
         
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
-            var id = item.id.videoId;
+            
+            var id = item.id.videoId || item.id; 
             var title = item.snippet.title;
             var thumb = item.snippet.thumbnails.medium.url;
-            var safeTitle = title.replace(/'/g, "\\'");
-
-            grid.innerHTML += '<div class="card" onclick="playVideo(\'' + id + '\', \'' + safeTitle + '\')">' +
-                '<img src="' + thumb + '">' +
-                '<p style="font-size:14px; margin-top:10px;">' + title + '</p>' +
-                '</div>';
+            
+            var card = document.createElement('div');
+            card.className = 'card';
+            
+            card.innerHTML = '<img src="' + thumb + '"><div class="card-info">' + title + '</div>';
+            
+            card.onclick = (function(v_id, v_title) {
+                return function() { 
+                    playVideo(v_id, v_title); 
+                };
+            })(id, title);
+            
+            grid.appendChild(card);
         }
     }
 
     function playVideo(id, title) {
+        // --- NEW FYP TRACKING LOGIC ---
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        
+        // Don't save the exact same title twice in a row
+        if (history.length === 0 || history[0] !== title) {
+            history.unshift(title); // Add new video to the front of the list
+        }
+        
+        // Keep the history at a maximum of 20 videos so it doesn't slow down your browser
+        if (history.length > 20) {
+            history.pop();
+        }
+        
+        // Save the updated list back to the computer
+        localStorage.setItem('yt_my_history', JSON.stringify(history));
+        // ------------------------------
+
         document.getElementById('player-wrapper').style.display = 'block';
         document.getElementById('playing-title').innerText = title;
         
         var playerUrl = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
         document.getElementById('main-player').src = playerUrl;
         
-        window.scrollTo(0,0);
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 </script>
-<script>
-     // --- FAZBEAR TAB RENAMER V3.0 (AUTO-GRABBER) ---
 
-(function() {
-    // 1. SETUP HTML FOR THE MENU
-    const html = `
-    <div id="cloaker-menu" style="
-        display: none; 
-        position: fixed; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
-        background: #111; 
-        border: 2px solid #b30000; 
-        padding: 20px; 
-        z-index: 99999; 
-        font-family: 'Courier New', monospace; 
-        color: #eee; 
-        text-align: center;
-        box-shadow: 0 0 50px #000;
-        width: 350px;
-    ">
-        <h3 style="color: #b30000; margin-top: 0;">TAB CLOAKER V3</h3>
-        
-        <label style="font-size: 0.8rem; color: #888;">QUICK SELECT:</label><br>
-        <select id="cloak-preset" style="width: 95%; margin-bottom: 15px; padding: 5px; background: #222; color: #fff; border: 1px solid #444;">
-            <option value="">-- Choose a Disguise --</option>
-            <option value="Google Drive|https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">Google Drive</option>
-            <option value="Google Classroom|https://ssl.gstatic.com/classroom/favicon.png">Google Classroom</option>
-            <option value="Google Docs|https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico">Google Docs</option>
-            <option value="My Drive - Google Drive|https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">My Drive</option>
-            <option value="Inbox (1) - Gmail|https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico">Gmail</option>
-            <option value="Wikipedia|https://en.wikipedia.org/static/favicon/wikipedia.ico">Wikipedia</option>
-            <option value="Canvas|https://du11hjcvx0uqb.cloudfront.net/dist/images/favicon-e10d657a73.ico">Canvas</option>
-            <option value="Schoology|https://ui.schoology.com/design-system/assets/favicon-d123.ico">Schoology</option>
-        </select>
-        
-        <hr style="border-color: #333; margin: 10px 0;">
 
-        <label style="font-size: 0.8rem;">TAB TITLE:</label><br>
-        <input type="text" id="cloak-title" placeholder="e.g. Math Notes" style="width: 90%; margin-bottom: 10px; padding: 5px; background: #000; color: #fff; border: 1px solid #333;"><br>
-        
-        <label style="font-size: 0.8rem;">WEBSITE ICON GRABBER:</label><br>
-        <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 15px;">
-            <input type="text" id="cloak-domain" placeholder="e.g. roblox.com" style="width: 60%; padding: 5px; background: #000; color: #fff; border: 1px solid #333;">
-            <button id="btn-grab" style="width: 30%; background: #444; color: white; border: none; cursor: pointer; font-size: 0.7rem;">GET ICON</button>
-        </div>
-
-        <input type="hidden" id="cloak-icon-url">
-        
-        <div style="margin-bottom: 15px;">
-            <img id="icon-preview" src="" style="width: 32px; height: 32px; display: none; border: 1px solid #555;">
-        </div>
-        
-        <button id="btn-cloak" style="background: #b30000; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold;">APPLY</button>
-        <button id="btn-reset-cloak" style="background: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-left: 5px;">RESET</button>
-        
-        <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Press Alt + R to Open / ESC to Close</div>
-    </div>
-    `;
-
-    // Add to body
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    document.body.appendChild(div);
-
-    // --- VARIABLES ---
-    const menu = document.getElementById('cloaker-menu');
-    const inputTitle = document.getElementById('cloak-title');
-    const inputDomain = document.getElementById('cloak-domain');
-    const inputIconUrl = document.getElementById('cloak-icon-url');
-    const selectPreset = document.getElementById('cloak-preset');
-    const imgPreview = document.getElementById('icon-preview');
-    
-    const btnGrab = document.getElementById('btn-grab');
-    const btnApply = document.getElementById('btn-cloak');
-    const btnReset = document.getElementById('btn-reset-cloak');
-
-    // --- FUNCTIONS ---
-
-    function setFavicon(url) {
-        let link = document.querySelector("link[rel~='icon']");
-        if (!link) {
-            link = document.createElement('link');
-            link.rel = 'icon';
-            document.getElementsByTagName('head')[0].appendChild(link);
-        }
-        link.href = url;
-    }
-
-    function loadSettings() {
-        const savedTitle = localStorage.getItem('faz_cloak_title');
-        const savedIcon = localStorage.getItem('faz_cloak_icon');
-
-        if (savedTitle) {
-            document.title = savedTitle;
-            inputTitle.value = savedTitle;
-        }
-
-        if (savedIcon) {
-            setFavicon(savedIcon);
-            inputIconUrl.value = savedIcon;
-            showPreview(savedIcon);
-        }
-    }
-
-    function showPreview(url) {
-        imgPreview.src = url;
-        imgPreview.style.display = 'inline-block';
-    }
-
-    // 1. PRESET HANDLER
-    selectPreset.addEventListener('change', function() {
-        const val = this.value;
-        if(!val) return;
-        
-        const parts = val.split('|'); // Split "Name|URL"
-        inputTitle.value = parts[0];
-        inputIconUrl.value = parts[1];
-        showPreview(parts[1]);
-    });
-
-    // 2. DOMAIN GRABBER HANDLER
-    btnGrab.addEventListener('click', function() {
-        const domain = inputDomain.value.trim();
-        if(!domain) return;
-
-        // Use Google's S2 Service to fetch favicon
-        const iconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-        
-        inputIconUrl.value = iconUrl;
-        showPreview(iconUrl);
-    });
-
-    // 3. APPLY SETTINGS
-    function applyCloak() {
-        const t = inputTitle.value;
-        const i = inputIconUrl.value;
-
-        if (t) {
-            document.title = t;
-            localStorage.setItem('faz_cloak_title', t);
-        }
-        
-        if (i) {
-            setFavicon(i);
-            localStorage.setItem('faz_cloak_icon', i);
-        }
-
-        menu.style.display = 'none';
-    }
-
-    // 4. RESET
-    function resetCloak() {
-        localStorage.removeItem('faz_cloak_title');
-        localStorage.removeItem('faz_cloak_icon');
-        location.reload(); 
-    }
-
-    // --- KEY LISTENERS ---
-    document.addEventListener('keydown', function(e) {
-        if (e.altKey && e.key.toLowerCase() === 'r') {
-            e.preventDefault();
-            menu.style.display = 'block';
-        }
-        if (e.key === 'Escape') {
-            menu.style.display = 'none';
-        }
-    });
-
-    btnApply.addEventListener('click', applyCloak);
-    btnReset.addEventListener('click', resetCloak);
-
-    // Load on start
-    loadSettings();
-
-})();
-</script>
 </body>
 </html>
-
 
