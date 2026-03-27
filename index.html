@@ -4,72 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Personal Video Hub</title>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        :root { --bg: #0f0f0f; --card: #1e1e1e; --text: #efefef; --accent: #ff0000; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 100px; }
+        :root { 
+            --bg: #0f0f0f; 
+            --card: #1e1e1e; 
+            --text: #efefef; 
+            --accent: #ff0000; 
+            --border: #333333;
+        }
         
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; padding-bottom: 100px; transition: background 0.3s, color 0.3s; }
         .container { max-width: 1000px; margin: 0 auto; }
 
         /* Navigation & Search */
-        .top-nav { display: flex; gap: 10px; margin-bottom: 25px; align-items: center; flex-wrap: wrap; }
-        .nav-btn { padding: 10px 20px; border-radius: 25px; border: 1px solid #333; background: #222; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .nav-btn:hover { background: #444; }
-        .search-container { display: flex; flex: 1; min-width: 250px; gap: 5px; }
-        input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #333; background: #000; color: white; outline: none; }
-        .search-btn { padding: 10px 25px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+        .top-nav { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; flex-wrap: wrap; }
+        .nav-btn { padding: 10px 20px; border-radius: 25px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .nav-btn:hover { border-color: var(--accent); }
         
+        .search-container { display: flex; flex: 1; min-width: 250px; gap: 5px; }
+        input[type="text"] { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
+        .search-btn { padding: 10px 25px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+
+        /* Theme Controls */
+        .theme-controls { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+        .color-picker { -webkit-appearance: none; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; background: none; }
+        .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker::-webkit-color-swatch { border: 2px solid var(--border); border-radius: 50%; }
+
+        /* Category Chips */
+        .chip-container { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; }
+        .chip { padding: 8px 16px; border-radius: 15px; background: var(--card); color: var(--text); border: 1px solid var(--border); cursor: pointer; white-space: nowrap; font-size: 14px; transition: 0.2s; }
+        .chip:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        
+        /* NEW: Special style for the Random button */
+        .chip-random { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
+
         /* Video Grid */
         .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid #222; }
-        .card:hover { transform: translateY(-5px); border-color: #444; background: #2a2a2a; }
-        .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-        .card-info { padding: 12px; font-size: 14px; font-weight: bold; }
+        .card { background: var(--card); border-radius: 10px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        
+        .thumb-container { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; }
+        .thumb-container img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .progress-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.2); }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; }
+        
+        .card-info { padding: 12px; font-size: 14px; font-weight: bold; flex-grow: 1; }
+        .queue-add-btn { margin: 0 12px 12px 12px; padding: 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .queue-add-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
-        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        /* NEW: Stats Dashboard Styles */
+        .stats-dashboard { background: var(--card); border: 1px solid var(--accent); border-radius: 15px; padding: 40px; text-align: center; max-width: 500px; margin: 40px auto; }
+        .stats-number { font-size: 3rem; font-weight: bold; color: var(--accent); margin: 10px 0; }
+        .stats-label { font-size: 1.2rem; color: #888; }
+
+        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .clear-btn { font-size: 12px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 5px 10px; border-radius: 15px; cursor: pointer; display: none; }
         .clear-btn:hover { background: #ff4444; color: white; }
 
-        /* Spotify-Style Floating Mini Player */
-        #mini-player {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 380px;
-            background: #181818;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            border: 1px solid #333;
-            z-index: 1000;
-            overflow: hidden;
-        }
-        .player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background: #222;
-        }
-        .player-title {
-            font-size: 13px;
-            font-weight: bold;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 85%;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 0;
-            font-weight: bold;
-        }
-        .close-btn:hover { color: white; }
-        .video-frame { position: relative; padding-bottom: 56.25%; height: 0; }
-        .video-frame iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .load-more-container { text-align: center; margin-top: 40px; }
+        #load-more-btn { display: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; border: none; background: var(--card); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.2s; margin: 0 auto; border: 1px solid var(--border); }
+        #load-more-btn:hover { border-color: var(--accent); }
+
+        /* Mini Player & Draggable Feature */
+        #mini-player { display: none; position: fixed; bottom: 20px; right: 20px; width: 380px; background: var(--bg); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid var(--border); z-index: 1000; overflow: hidden; transition: width 0.3s, height 0.3s; }
+        
+        /* NEW: Drag cursor indicator */
+        .player-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: var(--card); cursor: grab; user-select: none; }
+        .player-header:active { cursor: grabbing; }
+        
+        #mini-player.theater-mode { width: 80vw; max-width: 1000px; bottom: 50% !important; right: 50% !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); box-shadow: 0 0 0 100vmax rgba(0,0,0,0.9); }
+        
+        .player-title { font-size: 13px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; pointer-events: none; }
+        
+        .player-controls { display: flex; gap: 10px; }
+        .ctrl-btn { background: none; border: none; color: var(--text); font-size: 14px; cursor: pointer; padding: 0 5px; font-weight: bold; transition: 0.2s; }
+        .ctrl-btn:hover { color: var(--accent); }
+        
+        .video-frame { position: relative; padding-bottom: 56.25%; height: 0; background: #000; pointer-events: auto; }
+        #yt-api-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
     </style>
 </head>
 <body>
@@ -78,10 +92,29 @@
     <div class="top-nav">
         <button class="nav-btn" onclick="loadMyFeed()">🏠 My FYP</button>
         <button class="nav-btn" onclick="showHistory()">🕒 History</button>
+        <button class="nav-btn" onclick="showQueue()">📋 Queue</button>
+        <button class="nav-btn" onclick="showStats()">📊 Stats</button>
+        
         <div class="search-container">
             <input type="text" id="query" placeholder="Search for a video...">
             <button class="search-btn" onclick="searchVideos()">Search</button>
         </div>
+        
+        <div class="theme-controls">
+            <input type="color" id="accent-picker" class="color-picker" value="#ff0000" onchange="changeAccentColor()">
+            <button class="nav-btn" onclick="toggleTheme()">🌓 Theme</button>
+        </div>
+    </div>
+
+    <div class="chip-container">
+        <button class="chip chip-random" onclick="playRandomVideo()">🎲 Surprise Me</button>
+        
+        <button class="chip" onclick="searchCategory('Gaming')">🎮 Gaming</button>
+        <button class="chip" onclick="searchCategory('Music')">🎵 Music</button>
+        <button class="chip" onclick="searchCategory('Coding')">💻 Coding</button>
+        <button class="chip" onclick="searchCategory('Comedy')">🤣 Comedy</button>
+        <button class="chip" onclick="searchCategory('Podcasts')">🎙️ Podcasts</button>
+        <button class="chip" onclick="searchCategory('Science')">🔬 Science</button>
     </div>
 
     <h2>
@@ -90,107 +123,299 @@
     </h2>
     
     <div id="results-grid" class="video-grid"></div>
+    
+    <div class="load-more-container">
+        <button id="load-more-btn" onclick="loadMore()">↓ Load More Videos ↓</button>
+    </div>
 </div>
 
 <div id="mini-player">
-    <div class="player-header">
-        <div id="mini-title" class="player-title">Playing Video...</div>
-        <button class="close-btn" onclick="closePlayer()">✕</button>
+    <div class="player-header" id="drag-header">
+        <div id="mini-title" class="player-title">Playing...</div>
+        <div class="player-controls">
+            <button class="ctrl-btn" onclick="togglePlayPause()" id="play-pause-btn">⏸</button>
+            <button class="ctrl-btn" onclick="playNextInQueue()">⏭</button>
+            <button class="ctrl-btn" onclick="toggleTheaterMode()">⛶</button>
+            <button class="ctrl-btn" onclick="closePlayer()">✕</button>
+        </div>
     </div>
     <div class="video-frame">
-        <iframe id="main-player" 
-                src="" 
-                allow="autoplay; fullscreen" 
-                referrerpolicy="strict-origin-when-cross-origin" 
-                allowfullscreen>
-        </iframe>
+        <div id="yt-api-player"></div>
     </div>
 </div>
 
 <script>
     var API_KEY = 'AIzaSyApWV2GTxLf9aVm5I-AKPeSCZQLvEyvUz0'; // <--- PUT YOUR KEY HERE
+    
+    var ytPlayer; 
+    var myQueue = [];
+    var currentApiUrl = ''; 
+    var nextPageToken = '';
+    var timeTracker;
+    var currentPlayingId = '';
+    var isLightMode = false;
+
+    // --- NEW: Draggable Player Variables ---
+    var isDragging = false;
+    var dragOffsetX = 0;
+    var dragOffsetY = 0;
 
     window.onload = function() {
         if (API_KEY !== 'YOUR_API_KEY_HERE') {
             loadMyFeed();
+            var savedAccent = localStorage.getItem('yt_accent_color');
+            if(savedAccent) {
+                document.getElementById('accent-picker').value = savedAccent;
+                changeAccentColor();
+            }
         } else {
             document.getElementById('results-label').innerText = "Please add your API key to the code!";
         }
+        setupDraggablePlayer();
     };
 
+    // --- NEW: Draggable (PiP) Logic ---
+    function setupDraggablePlayer() {
+        var header = document.getElementById('drag-header');
+        var playerBox = document.getElementById('mini-player');
+
+        header.onmousedown = function(e) {
+            // Prevent dragging if clicking a button or in theater mode
+            if(e.target.tagName === 'BUTTON' || playerBox.classList.contains('theater-mode')) return;
+            isDragging = true;
+            var rect = playerBox.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+        };
+
+        document.onmousemove = function(e) {
+            if (isDragging) {
+                // Remove the fixed bottom/right snapping so free movement works
+                playerBox.style.bottom = 'auto';
+                playerBox.style.right = 'auto';
+                playerBox.style.left = (e.clientX - dragOffsetX) + 'px';
+                playerBox.style.top = (e.clientY - dragOffsetY) + 'px';
+            }
+        };
+
+        document.onmouseup = function() {
+            isDragging = false;
+        };
+    }
+
+    // --- NEW: Watch Time Stats ---
+    function showStats() {
+        document.getElementById('results-label').innerText = 'Your Analytics';
+        document.getElementById('clear-history-btn').style.display = 'none'; 
+        document.getElementById('load-more-btn').style.display = 'none'; 
+        
+        var totalSeconds = parseInt(localStorage.getItem('yt_total_watch_time')) || 0;
+        var hours = Math.floor(totalSeconds / 3600);
+        var minutes = Math.floor((totalSeconds % 3600) / 60);
+
+        var grid = document.getElementById('results-grid');
+        grid.style.display = 'block'; // Remove grid style temporarily for a clean card
+        
+        grid.innerHTML = '<div class="stats-dashboard">' +
+            '<div class="stats-label">Total Time Watched on Hub</div>' +
+            '<div class="stats-number">' + hours + '<span style="font-size: 1.5rem;">hrs</span> ' + minutes + '<span style="font-size: 1.5rem;">mins</span></div>' +
+            '<p style="color: #888; font-size: 0.9rem;">This tracks every second a video is actively playing.</p>' +
+            '</div>';
+    }
+
+    // --- NEW: Random Video Generator ---
+    function playRandomVideo() {
+        document.getElementById('results-label').innerText = 'Rolling the dice...';
+        // A list of fun, totally random topics to pull from
+        var randomTopics = ['deep ocean documentary', 'optical illusions', 'history mysteries', 'satisfying restoration', 'space exploration', 'funny animal fails', 'street food tour'];
+        var selectedTopic = randomTopics[Math.floor(Math.random() * randomTopics.length)];
+        
+        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(selectedTopic);
+        
+        fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(data) { 
+                if(data.items && data.items.length > 0) {
+                    var item = data.items[0];
+                    // Instantly play the first result it finds!
+                    playVideo(item.id.videoId, item.snippet.title, item.snippet.thumbnails.medium.url);
+                }
+            });
+    }
+
+    // --- Theme & Navigation Functions ---
+    function toggleTheme() {
+        var root = document.documentElement;
+        isLightMode = !isLightMode;
+        if (isLightMode) {
+            root.style.setProperty('--bg', '#f0f0f0'); root.style.setProperty('--card', '#ffffff');
+            root.style.setProperty('--text', '#111111'); root.style.setProperty('--border', '#dddddd');
+        } else {
+            root.style.setProperty('--bg', '#0f0f0f'); root.style.setProperty('--card', '#1e1e1e');
+            root.style.setProperty('--text', '#efefef'); root.style.setProperty('--border', '#333333');
+        }
+    }
+
+    function changeAccentColor() {
+        var color = document.getElementById('accent-picker').value;
+        document.documentElement.style.setProperty('--accent', color);
+        localStorage.setItem('yt_accent_color', color);
+    }
+
+    function searchCategory(category) {
+        document.getElementById('results-grid').style.display = 'grid'; // Reset grid display
+        document.getElementById('clear-history-btn').style.display = 'none';
+        document.getElementById('results-label').innerText = category + ' Videos';
+        currentApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(category + ' trending');
+        fetchVideos(currentApiUrl, false);
+    }
+
+    function togglePlayPause() {
+        if (!ytPlayer) return;
+        var state = ytPlayer.getPlayerState();
+        var btn = document.getElementById('play-pause-btn');
+        if (state === YT.PlayerState.PLAYING) {
+            ytPlayer.pauseVideo(); btn.innerText = '▶';
+        } else {
+            ytPlayer.playVideo(); btn.innerText = '⏸';
+        }
+    }
+
+    function toggleTheaterMode() {
+        var playerBox = document.getElementById('mini-player');
+        if (playerBox.classList.contains('theater-mode')) {
+            playerBox.classList.remove('theater-mode');
+            // Reset to original corner position
+            playerBox.style.left = 'auto';
+            playerBox.style.top = 'auto';
+            playerBox.style.bottom = '20px';
+            playerBox.style.right = '20px';
+        } else {
+            playerBox.classList.add('theater-mode');
+            // Clean up inline drag styles so CSS translate works
+            playerBox.style.left = ''; playerBox.style.top = '';
+        }
+    }
+
+    function getProgressHTML(id) {
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        for (var i = 0; i < history.length; i++) {
+            if (history[i].id === id && history[i].totalTime > 0) {
+                var percentage = (history[i].savedTime / history[i].totalTime) * 100;
+                if (percentage > 100) percentage = 100;
+                if (percentage > 1) {
+                    return '<div class="progress-bg"><div class="progress-bar" style="width:' + percentage + '%;"></div></div>';
+                }
+            }
+        }
+        return ''; 
+    }
+
     function loadMyFeed() {
+        document.getElementById('results-grid').style.display = 'grid';
         document.getElementById('clear-history-btn').style.display = 'none';
         var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-        var url = '';
 
         if (history.length === 0) {
             document.getElementById('results-label').innerText = 'Trending (Watch videos to build your FYP!)';
-            url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=US&maxResults=15&key=' + API_KEY;
+            currentApiUrl = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=US&maxResults=50&key=' + API_KEY;
         } else {
             var randomPastVideo = history[Math.floor(Math.random() * history.length)];
             var searchTitle = typeof randomPastVideo === 'string' ? randomPastVideo : randomPastVideo.title;
             var shortTitle = searchTitle.length > 30 ? searchTitle.substring(0, 30) + '...' : searchTitle;
             
             document.getElementById('results-label').innerText = 'Because you watched: "' + shortTitle + '"';
-            url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(searchTitle);
+            currentApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(searchTitle);
         }
-        
-        fetch(url)
-            .then(function(res) { return res.json(); })
-            .then(function(data) { 
-                if(data.items) { render(data.items); }
-            })
-            .catch(function(err) { console.log("Error fetching feed"); });
+        fetchVideos(currentApiUrl, false);
     }
 
     function searchVideos() {
+        document.getElementById('results-grid').style.display = 'grid';
         document.getElementById('clear-history-btn').style.display = 'none';
         var q = document.getElementById('query').value;
         if (!q) return;
         
         document.getElementById('results-label').innerText = 'Search Results for: "' + q + '"';
-        var url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(q);
-        
-        fetch(url)
+        currentApiUrl = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(q);
+        fetchVideos(currentApiUrl, false);
+    }
+
+    function fetchVideos(url, isAppending) {
+        var finalUrl = url;
+        if (isAppending && nextPageToken) finalUrl += '&pageToken=' + nextPageToken;
+
+        fetch(finalUrl)
             .then(function(res) { return res.json(); })
             .then(function(data) { 
-                if(data.items) { render(data.items); } 
-            })
-            .catch(function(err) { console.log("Error fetching search"); });
+                nextPageToken = data.nextPageToken || ''; 
+                if(data.items) { render(data.items, isAppending); }
+                if (nextPageToken !== '') { document.getElementById('load-more-btn').style.display = 'block'; } 
+                else { document.getElementById('load-more-btn').style.display = 'none'; }
+            });
+    }
+
+    function loadMore() {
+        if (currentApiUrl !== '') fetchVideos(currentApiUrl, true);
     }
 
     function showHistory() {
+        document.getElementById('results-grid').style.display = 'grid';
         document.getElementById('results-label').innerText = 'Your Watch History';
         document.getElementById('clear-history-btn').style.display = 'block'; 
+        document.getElementById('load-more-btn').style.display = 'none'; 
         
         var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
         var grid = document.getElementById('results-grid');
         grid.innerHTML = ''; 
 
         if (history.length === 0) {
-            grid.innerHTML = '<p>Your history is empty. Go watch some videos!</p>';
-            return;
+            grid.innerHTML = '<p>Your history is empty. Go watch some videos!</p>'; return;
         }
 
         for (var i = 0; i < history.length; i++) {
             var item = history[i];
-            var isOldFormat = typeof item === 'string';
-            var title = isOldFormat ? item : item.title;
-            var id = isOldFormat ? '' : item.id;
-            var thumb = isOldFormat ? 'https://via.placeholder.com/320x180/222222/ffffff?text=Old+Video' : item.thumb;
+            var id = typeof item === 'string' ? '' : item.id;
+            var title = typeof item === 'string' ? item : item.title;
+            var thumb = typeof item === 'string' ? 'https://via.placeholder.com/320x180/222222/ffffff?text=Old+Video' : item.thumb;
 
             var card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = '<img src="' + thumb + '"><div class="card-info">' + title + '</div>';
+            var progressHTML = getProgressHTML(id);
+            card.innerHTML = '<div class="thumb-container"><img src="' + thumb + '">' + progressHTML + '</div><div class="card-info">' + title + '</div>';
             
-            if (!isOldFormat) {
+            if (id !== '') {
                 card.onclick = (function(v_id, v_title, v_thumb) {
                     return function() { playVideo(v_id, v_title, v_thumb); };
                 })(id, title, thumb);
-            } else {
-                card.onclick = function() { alert("This is an older video without an ID. Please search for it to watch it again!"); };
             }
+            grid.appendChild(card);
+        }
+    }
+
+    function showQueue() {
+        document.getElementById('results-grid').style.display = 'grid';
+        document.getElementById('results-label').innerText = 'Up Next (Your Queue)';
+        document.getElementById('clear-history-btn').style.display = 'none'; 
+        document.getElementById('load-more-btn').style.display = 'none'; 
+        
+        var grid = document.getElementById('results-grid');
+        grid.innerHTML = ''; 
+
+        if (myQueue.length === 0) {
+            grid.innerHTML = '<p>Your queue is empty. Click "+ Add to Queue" on a video to line it up!</p>'; return;
+        }
+
+        for (var i = 0; i < myQueue.length; i++) {
+            var item = myQueue[i];
+            var card = document.createElement('div');
+            card.className = 'card';
+            var progressHTML = getProgressHTML(item.id);
+            card.innerHTML = '<div class="thumb-container"><img src="' + item.thumb + '">' + progressHTML + '</div><div class="card-info">' + item.title + '</div>';
             
+            card.onclick = (function(v_id, v_title, v_thumb) {
+                return function() { playVideo(v_id, v_title, v_thumb); };
+            })(item.id, item.title, item.thumb);
             grid.appendChild(card);
         }
     }
@@ -202,9 +427,23 @@
         }
     }
 
-    function render(items) {
+    function addToQueue(id, title, thumb) {
+        myQueue.push({ id: id, title: title, thumb: thumb });
+        alert('Added to Queue: ' + title);
+    }
+
+    function playNextInQueue() {
+        if (myQueue.length > 0) {
+            var nextVideo = myQueue.shift(); 
+            playVideo(nextVideo.id, nextVideo.title, nextVideo.thumb);
+        } else {
+            closePlayer(); 
+        }
+    }
+
+    function render(items, isAppending) {
         var grid = document.getElementById('results-grid');
-        grid.innerHTML = ''; 
+        if (!isAppending) { grid.innerHTML = ''; }
         
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
@@ -214,50 +453,124 @@
             
             var card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = '<img src="' + thumb + '"><div class="card-info">' + title + '</div>';
+            var progressHTML = getProgressHTML(id);
             
+            card.innerHTML = '<div class="thumb-container"><img src="' + thumb + '">' + progressHTML + '</div><div class="card-info">' + title + '</div>';
+            
+            var queueBtn = document.createElement('button');
+            queueBtn.className = 'queue-add-btn';
+            queueBtn.innerText = '+ Add to Queue';
+            queueBtn.onclick = (function(v_id, v_title, v_thumb) {
+                return function(e) { e.stopPropagation(); addToQueue(v_id, v_title, v_thumb); };
+            })(id, title, thumb);
+            
+            card.appendChild(queueBtn);
             card.onclick = (function(v_id, v_title, v_thumb) {
-                return function() { 
-                    playVideo(v_id, v_title, v_thumb); 
-                };
+                return function() { playVideo(v_id, v_title, v_thumb); };
             })(id, title, thumb);
             
             grid.appendChild(card);
         }
     }
 
-    function playVideo(id, title, thumb) {
-        // 1. Save to History for the FYP
+    function saveCurrentTime() {
+        if (ytPlayer && currentPlayingId) {
+            var currentTime = ytPlayer.getCurrentTime();
+            var totalDuration = ytPlayer.getDuration();
+            var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+            for (var i = 0; i < history.length; i++) {
+                if (history[i].id === currentPlayingId) {
+                    history[i].savedTime = currentTime;
+                    history[i].totalTime = totalDuration; 
+                    break;
+                }
+            }
+            localStorage.setItem('yt_my_history', JSON.stringify(history));
+            
+            // NEW: Add 2 seconds to global watch time!
+            var globalTime = parseInt(localStorage.getItem('yt_total_watch_time')) || 0;
+            localStorage.setItem('yt_total_watch_time', globalTime + 2);
+        }
+    }
+
+    function resetCurrentTime() {
         var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
-        
-        for (var k = 0; k < history.length; k++) {
-            if (typeof history[k] === 'string') {
-                history[k] = { id: '', title: history[k], thumb: 'https://via.placeholder.com/320x180/222222/ffffff?text=Old+Video' };
+        for (var i = 0; i < history.length; i++) {
+            if (history[i].id === currentPlayingId) { history[i].savedTime = 0; break; }
+        }
+        localStorage.setItem('yt_my_history', JSON.stringify(history));
+    }
+
+    function playVideo(id, title, thumb) {
+        currentPlayingId = id; 
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        var startTime = 0;
+        var existingIndex = -1;
+
+        for (var i = 0; i < history.length; i++) {
+            if (history[i].id === id) {
+                existingIndex = i;
+                startTime = Math.floor(history[i].savedTime || 0);
+                break;
             }
         }
-        
-        if (history.length === 0 || history[0].id !== id) {
-            history.unshift({ id: id, title: title, thumb: thumb }); 
+
+        var currentVideoObj = { id: id, title: title, thumb: thumb, savedTime: startTime, totalTime: 0 };
+        if (existingIndex > -1) {
+            currentVideoObj.totalTime = history[existingIndex].totalTime || 0;
+            history.splice(existingIndex, 1); 
         }
-        
-        if (history.length > 40) {
-            history.pop();
-        }
-        
+        history.unshift(currentVideoObj); 
+        if (history.length > 40) history.pop();
         localStorage.setItem('yt_my_history', JSON.stringify(history));
 
-        // 2. Show the floating mini-player
         document.getElementById('mini-player').style.display = 'block';
         document.getElementById('mini-title').innerText = title;
+        document.getElementById('play-pause-btn').innerText = '⏸'; 
         
-        var playerUrl = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
-        document.getElementById('main-player').src = playerUrl;
+        if (!ytPlayer) {
+            ytPlayer = new YT.Player('yt-api-player', {
+                videoId: id,
+                playerVars: { 'autoplay': 1, 'rel': 0, 'start': startTime },
+                events: {
+                    'onStateChange': function(event) {
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            clearInterval(timeTracker);
+                            timeTracker = setInterval(saveCurrentTime, 2000); 
+                            document.getElementById('play-pause-btn').innerText = '⏸';
+                        } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                            clearInterval(timeTracker);
+                            saveCurrentTime(); 
+                            document.getElementById('play-pause-btn').innerText = '▶';
+                            
+                            if (event.data === YT.PlayerState.ENDED) {
+                                resetCurrentTime(); playNextInQueue();
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            ytPlayer.loadVideoById({ videoId: id, startSeconds: startTime });
+        }
     }
 
     function closePlayer() {
-        // Hide the player and clear the video link so the audio stops playing
-        document.getElementById('mini-player').style.display = 'none';
-        document.getElementById('main-player').src = ''; 
+        var playerBox = document.getElementById('mini-player');
+        playerBox.style.display = 'none';
+        playerBox.classList.remove('theater-mode'); 
+        
+        // Reset position so it goes back to the corner next time
+        playerBox.style.left = 'auto'; playerBox.style.top = 'auto';
+        playerBox.style.bottom = '20px'; playerBox.style.right = '20px';
+        
+        if (ytPlayer) {
+            saveCurrentTime(); clearInterval(timeTracker); ytPlayer.stopVideo(); 
+        }
+        
+        var currentLabel = document.getElementById('results-label').innerText;
+        if (currentLabel === 'Your Watch History') { showHistory(); } 
+        else if (currentLabel === 'Up Next (Your Queue)') { showQueue(); }
     }
 </script>
 <script>
@@ -440,4 +753,5 @@
 </script>
 </body>
 </html>
+
 
