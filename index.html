@@ -10,10 +10,13 @@
         
         .container { max-width: 1000px; margin: 0 auto; }
 
-        /* Search Bar */
-        .search-box { display: flex; gap: 10px; margin-bottom: 25px; }
+        /* Navigation & Search */
+        .top-nav { display: flex; gap: 10px; margin-bottom: 25px; align-items: center; flex-wrap: wrap; }
+        .nav-btn { padding: 10px 20px; border-radius: 25px; border: 1px solid #333; background: #222; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .nav-btn:hover { background: #444; }
+        .search-container { display: flex; flex: 1; min-width: 250px; gap: 5px; }
         input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #333; background: #000; color: white; outline: none; }
-        button { padding: 10px 25px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+        .search-btn { padding: 10px 25px; border-radius: 25px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
 
         /* Video Player Area */
         #player-wrapper { display: none; margin-bottom: 30px; background: #000; padding: 10px; border-radius: 12px; border: 1px solid #333; }
@@ -27,15 +30,21 @@
         .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
         .card-info { padding: 12px; font-size: 14px; font-weight: bold; }
 
-        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        h2 { font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .clear-btn { font-size: 12px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 5px 10px; border-radius: 15px; cursor: pointer; display: none; }
+        .clear-btn:hover { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="search-box">
-        <input type="text" id="query" placeholder="Search for a video...">
-        <button onclick="searchVideos()">Search</button>
+    <div class="top-nav">
+        <button class="nav-btn" onclick="loadMyFeed()">🏠 My FYP</button>
+        <button class="nav-btn" onclick="showHistory()">🕒 History</button>
+        <div class="search-container">
+            <input type="text" id="query" placeholder="Search for a video...">
+            <button class="search-btn" onclick="searchVideos()">Search</button>
+        </div>
     </div>
 
     <div id="player-wrapper">
@@ -50,7 +59,10 @@
         <h3 id="playing-title" style="margin-top: 15px;"></h3>
     </div>
 
-    <h2 id="results-label">Loading your feed...</h2>
+    <h2>
+        <span id="results-label">Loading your feed...</span>
+        <button id="clear-history-btn" class="clear-btn" onclick="clearHistory()">Clear History</button>
+    </h2>
     <div id="results-grid" class="video-grid"></div>
 </div>
 
@@ -66,24 +78,23 @@
     };
 
     function loadMyFeed() {
-        // 1. Grab the history from localStorage (or create an empty array if none exists)
+        document.getElementById('clear-history-btn').style.display = 'none';
         var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
         var url = '';
 
         if (history.length === 0) {
-            // 2. If you haven't watched anything yet, load Trending videos
             document.getElementById('results-label').innerText = 'Trending (Watch videos to build your FYP!)';
             url = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&regionCode=US&maxResults=15&key=' + API_KEY;
         } else {
-            // 3. Pick a random video title from your watch history to base the feed on
             var randomPastVideo = history[Math.floor(Math.random() * history.length)];
             
-            // Clean up the text for the label so it doesn't get too long
-            var shortTitle = randomPastVideo.length > 30 ? randomPastVideo.substring(0, 30) + '...' : randomPastVideo;
+            // Auto-Upgrader Check: Is it an old string, or a new object?
+            var searchTitle = typeof randomPastVideo === 'string' ? randomPastVideo : randomPastVideo.title;
+            
+            var shortTitle = searchTitle.length > 30 ? searchTitle.substring(0, 30) + '...' : searchTitle;
             document.getElementById('results-label').innerText = 'Because you watched: "' + shortTitle + '"';
             
-            // Search YouTube for videos related to that past video
-            url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(randomPastVideo);
+            url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=15&type=video&videoEmbeddable=true&key=' + API_KEY + '&q=' + encodeURIComponent(searchTitle);
         }
         
         fetch(url)
@@ -95,6 +106,7 @@
     }
 
     function searchVideos() {
+        document.getElementById('clear-history-btn').style.display = 'none';
         var q = document.getElementById('query').value;
         if (!q) return;
         
@@ -110,49 +122,97 @@
             .catch(function(err) { console.log("Error fetching search"); });
     }
 
+    function showHistory() {
+        document.getElementById('results-label').innerText = 'Your Watch History';
+        document.getElementById('clear-history-btn').style.display = 'block'; // Show clear button
+        
+        var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
+        var grid = document.getElementById('results-grid');
+        grid.innerHTML = ''; 
+
+        if (history.length === 0) {
+            grid.innerHTML = '<p>Your history is empty. Go watch some videos!</p>';
+            return;
+        }
+
+        for (var i = 0; i < history.length; i++) {
+            var item = history[i];
+            
+            // Handle old string-only saves
+            var isOldFormat = typeof item === 'string';
+            var title = isOldFormat ? item : item.title;
+            var id = isOldFormat ? '' : item.id;
+            var thumb = isOldFormat ? 'https://via.placeholder.com/320x180/222222/ffffff?text=Old+Video' : item.thumb;
+
+            var card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = '<img src="' + thumb + '"><div class="card-info">' + title + '</div>';
+            
+            if (!isOldFormat) {
+                card.onclick = (function(v_id, v_title, v_thumb) {
+                    return function() { playVideo(v_id, v_title, v_thumb); };
+                })(id, title, thumb);
+            } else {
+                card.onclick = function() { alert("This is an older video without an ID. Please search for it to watch it again!"); };
+            }
+            
+            grid.appendChild(card);
+        }
+    }
+
+    function clearHistory() {
+        if (confirm("Are you sure you want to delete your history? This will reset your FYP!")) {
+            localStorage.removeItem('yt_my_history');
+            showHistory(); // Refresh the page to show it's empty
+        }
+    }
+
     function render(items) {
         var grid = document.getElementById('results-grid');
         grid.innerHTML = ''; 
         
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
-            
             var id = item.id.videoId || item.id; 
             var title = item.snippet.title;
             var thumb = item.snippet.thumbnails.medium.url;
             
             var card = document.createElement('div');
             card.className = 'card';
-            
             card.innerHTML = '<img src="' + thumb + '"><div class="card-info">' + title + '</div>';
             
-            card.onclick = (function(v_id, v_title) {
+            // Notice we are now passing the thumbnail to playVideo as well!
+            card.onclick = (function(v_id, v_title, v_thumb) {
                 return function() { 
-                    playVideo(v_id, v_title); 
+                    playVideo(v_id, v_title, v_thumb); 
                 };
-            })(id, title);
+            })(id, title, thumb);
             
             grid.appendChild(card);
         }
     }
 
-    function playVideo(id, title) {
-        // --- NEW FYP TRACKING LOGIC ---
+    function playVideo(id, title, thumb) {
         var history = JSON.parse(localStorage.getItem('yt_my_history')) || [];
         
-        // Don't save the exact same title twice in a row
-        if (history.length === 0 || history[0] !== title) {
-            history.unshift(title); // Add new video to the front of the list
+        // Upgrade the whole history file to support thumbnails
+        for (var k = 0; k < history.length; k++) {
+            if (typeof history[k] === 'string') {
+                history[k] = { id: '', title: history[k], thumb: 'https://via.placeholder.com/320x180/222222/ffffff?text=Old+Video' };
+            }
         }
         
-        // Keep the history at a maximum of 20 videos so it doesn't slow down your browser
-        if (history.length > 20) {
+        // Only save it if it's not the exact same video we just clicked
+        if (history.length === 0 || history[0].id !== id) {
+            history.unshift({ id: id, title: title, thumb: thumb }); 
+        }
+        
+        // Let's store up to 40 videos in history now!
+        if (history.length > 40) {
             history.pop();
         }
         
-        // Save the updated list back to the computer
         localStorage.setItem('yt_my_history', JSON.stringify(history));
-        // ------------------------------
 
         document.getElementById('player-wrapper').style.display = 'block';
         document.getElementById('playing-title').innerText = title;
@@ -344,4 +404,5 @@
 
 </body>
 </html>
+
 
